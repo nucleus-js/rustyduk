@@ -2,8 +2,13 @@
 name = "rusty-duktape"
 version = "0.1.0"
 authors = ["Tim Caswell <tim@creationix.com>"]
+build = "build.rs"
 
 [dependencies]
 # duktape = "0.0.2"
 # libuv-sys = "0.1.0"
 getopts = "0.2"
+libc = "0.2"
+
+[build-dependencies]
+gcc = "0.3"
