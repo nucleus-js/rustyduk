@@ -31,7 +31,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
 
-    // process arguments
+    // process options
     let mut opts = Options::new();
     opts.optopt("o", "output", "set output file name", "FILE");
     opts.optflag("h", "help", "print this help menu");
@@ -46,19 +46,26 @@ fn main() {
         return;
     }
 
+    // TODO(Fishrock123): Uncomment when we start working on bundling.
     // let output = matches.opt_str("o");
-    let input = if !matches.free.is_empty() {
-        matches.free[0].clone()
-    } else {
+
+    // if there is no free argument (such as a filename or folder),
+    // print the help
+    let input = if matches.free.is_empty() {
         print_usage(&program, opts);
         return;
+    } else {
+        // otherwise make a copy of the arument so we can use it
+        matches.free[0].clone()
     };
 
+    // Get the realpath
     let js_path = match fs::canonicalize(input) {
         Ok(m) => { m }
         Err(f) => { panic!(f.to_string()) }
     };
 
+    // Convert the path::Path into a String we can pass to C
     let c_js_path = CString::new(js_path.to_str().unwrap()).unwrap();
 
     let context: *mut duk_context;
