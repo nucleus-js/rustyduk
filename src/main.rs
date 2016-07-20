@@ -2,7 +2,7 @@
 use std::{env, fs};
 use std::ffi::CString;
 
-// module imports
+// crate imports
 extern crate libc;
 use libc::{c_char, c_int};
 
@@ -10,9 +10,15 @@ extern crate getopts;
 use getopts::Options;
 //
 
-// Intentionally has the same name as the C struct
-#[allow(non_camel_case_types)]
-enum duk_context {}
+// declare internal modules
+mod nucleus;
+mod duk_structs;
+//
+
+// use internals
+use nucleus::duk_put_nucleus;
+use duk_structs::duk_context;
+//
 
 extern {
     fn rust_duk_create_heap_default() -> *mut duk_context;
@@ -68,10 +74,17 @@ fn main() {
     // Convert the path::Path into a String we can pass to C
     let c_js_path = CString::new(js_path.to_str().unwrap()).unwrap();
 
-    let context: *mut duk_context;
+    // duktape setup
+    let ctx: *mut duk_context;
     unsafe {
-        context = rust_duk_create_heap_default();
-        rust_duk_peval_file(context, c_js_path.as_ptr());
-        duk_destroy_heap(context);
+        ctx = rust_duk_create_heap_default();
+    }
+
+    // nucleus JS setup
+    duk_put_nucleus(ctx, args);
+
+    unsafe {
+        rust_duk_peval_file(ctx, c_js_path.as_ptr());
+        duk_destroy_heap(ctx);
     }
 }
