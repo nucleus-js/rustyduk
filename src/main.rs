@@ -13,6 +13,7 @@ use getopts::Options;
 // declare internal modules
 mod nucleus;
 mod duk_structs;
+mod duk_api;
 //
 
 // use internals
