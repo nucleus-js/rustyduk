@@ -14,6 +14,7 @@ use getopts::Options;
 mod nucleus;
 mod duk_structs;
 mod duk_api;
+mod nucleus_functions;
 //
 
 // use internals

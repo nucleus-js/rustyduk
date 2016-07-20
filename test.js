@@ -15,3 +15,8 @@ print("engine: ", nucleus.engine)
 print("versions: ", nucleus.versions)
 
 print("versions.duktape: ", nucleus.versions.duktape)
+
+print("exit: ", nucleus.exit)
+
+nucleus.exit(0);
+print("Error: do not print me!")
