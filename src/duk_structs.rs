@@ -17,7 +17,7 @@ pub struct duk_function_list_entry {
 	value: extern fn(*mut duk_context) -> i32,
 	nargs: i32,
 }
-impl<'a> duk_function_list_entry {
+impl duk_function_list_entry {
     pub fn new(key: &str, value: extern fn(*mut duk_context) -> i32, nargs: i32) -> Self {
 		let c_key = CString::new(key).unwrap();
         duk_function_list_entry { key: c_key.as_ptr(), value: value, nargs: nargs }
