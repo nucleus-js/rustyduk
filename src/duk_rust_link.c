@@ -11,3 +11,5 @@ duk_context *rust_duk_create_heap_default(void) {
 duk_int_t rust_duk_peval_file(duk_context *ctx, const char *path) {
   return duk_peval_file(ctx, path);
 }
+
+long _DUK_VERSION = DUK_VERSION;
