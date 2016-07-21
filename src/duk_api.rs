@@ -1,5 +1,6 @@
 // stdlib imports
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
+use std::str;
 
 // crate imports
 extern crate libc;
@@ -15,6 +16,7 @@ use duk_structs::{duk_context, duk_function_list_entry};
 
 extern {
     fn duk_concat(ctx: *mut duk_context, count: c_int);
+    fn duk_get_prop_string(ctx: *mut duk_context, obj_index: c_int, key: *const c_char) -> bool;
     fn duk_push_array(ctx: *mut duk_context) -> c_int;
     fn duk_push_int(ctx: *mut duk_context, val: c_int);
     fn duk_push_object(ctx: *mut duk_context) -> c_int;
@@ -24,12 +26,21 @@ extern {
     fn duk_put_prop_index(ctx: *mut duk_context, obj_index: c_int, arr_index: c_uint) -> bool;
     fn duk_put_prop_string(ctx: *mut duk_context, obj_index: c_int, key: *const c_char) -> bool;
     fn duk_require_int(ctx: *mut duk_context, index: c_int) -> c_int;
+    fn _duk_safe_to_string(ctx: *mut duk_context, index: c_int) -> *const c_char;
 }
 
 // duk_concat
 pub fn concat(ctx: *mut duk_context, count: i32) {
     unsafe {
         duk_concat(ctx, count)
+    }
+}
+
+// duk_get_prop_string
+pub fn get_prop_string<T: Into<Vec<u8>>>(ctx: *mut duk_context, obj_index: c_int, key: T) -> bool {
+    let cstring_key = CString::new(key).unwrap();
+    unsafe {
+        duk_get_prop_string(ctx, obj_index, cstring_key.as_ptr())
     }
 }
 
@@ -97,4 +108,16 @@ pub fn require_int(ctx: *mut duk_context, index: i32) -> i32 {
     unsafe {
         duk_require_int(ctx, index)
     }
+}
+
+// duk_safe_to_string
+pub fn safe_to_string(ctx: *mut duk_context, index: c_int) -> String {
+    let external_str: *const c_char;
+    unsafe {
+        external_str = _duk_safe_to_string(ctx, index)
+    }
+    let c_str: &CStr = unsafe { CStr::from_ptr(external_str) };
+    let buf: &[u8] = c_str.to_bytes();
+    let str_slice: &str = str::from_utf8(buf).unwrap();
+    str_slice.to_owned()
 }

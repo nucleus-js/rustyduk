@@ -1,5 +1,5 @@
 // stdlib imports
-use std::{env, fs};
+use std::{env, fs, process};
 use std::ffi::CString;
 
 // crate imports
@@ -20,12 +20,14 @@ mod nucleus_functions;
 // use internals
 use nucleus::duk_put_nucleus;
 use duk_structs::duk_context;
+use duk_api as duk;
 //
 
 extern {
     fn _duk_create_heap_default() -> *mut duk_context;
     fn _duk_peval_file(ctx: *mut duk_context, path: *const c_char) -> c_int;
     fn duk_destroy_heap(ctx: *mut duk_context);
+    fn _duk_dump_context_stderr(ctx: *mut duk_context);
 }
 
 
@@ -85,8 +87,22 @@ fn main() {
     // nucleus JS setup
     duk_put_nucleus(ctx, args);
 
+    let err: i32;
     unsafe {
-        _duk_peval_file(ctx, c_js_path.as_ptr());
+        err = _duk_peval_file(ctx, c_js_path.as_ptr());
+    }
+
+    if err > 0 {
+        unsafe {
+            _duk_dump_context_stderr(ctx);
+        }
+        duk::get_prop_string(ctx, -1, "stack");
+        let err_str = duk::safe_to_string(ctx, -1);
+        println!("Uncaught {}\n", err_str);
+        process::exit(1);
+    }
+
+    unsafe {
         duk_destroy_heap(ctx);
     }
 }
