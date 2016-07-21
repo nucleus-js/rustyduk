@@ -9,6 +9,10 @@ use libc::{c_char, c_int, c_uint};
 use duk_structs::{duk_context, duk_function_list_entry};
 //
 
+/*
+ * These lists should be kept Alphabetized!
+ */
+
 extern {
     fn duk_concat(ctx: *mut duk_context, count: c_int);
     fn duk_push_array(ctx: *mut duk_context) -> c_int;
@@ -16,9 +20,10 @@ extern {
     fn duk_push_object(ctx: *mut duk_context) -> c_int;
     fn duk_push_string(ctx: *mut duk_context, string: *const c_char) -> c_char;
     fn duk_put_function_list(ctx: *mut duk_context, obj_index: c_int, funcs: *const duk_function_list_entry);
+    fn duk_put_global_string(ctx: *mut duk_context, key: *const c_char) -> bool;
     fn duk_put_prop_index(ctx: *mut duk_context, obj_index: c_int, arr_index: c_uint) -> bool;
     fn duk_put_prop_string(ctx: *mut duk_context, obj_index: c_int, key: *const c_char) -> bool;
-    fn duk_put_global_string(ctx: *mut duk_context, key: *const c_char) -> bool;
+    fn duk_require_int(ctx: *mut duk_context, index: c_int) -> c_int;
 }
 
 // duk_concat
@@ -64,6 +69,14 @@ pub fn put_function_list(ctx: *mut duk_context, obj_index: i32, funcs: *const du
     }
 }
 
+// duk_put_global_string
+pub fn put_global_string<T: Into<Vec<u8>>>(ctx: *mut duk_context, key: T) -> bool {
+    let cstring_key = CString::new(key).unwrap();
+    unsafe {
+        duk_put_global_string(ctx, cstring_key.as_ptr())
+    }
+}
+
 // duk_put_prop_index
 pub fn put_prop_index(ctx: *mut duk_context, obj_index: i32, arr_index: u32) -> bool {
     unsafe {
@@ -79,10 +92,9 @@ pub fn put_prop_string<T: Into<Vec<u8>>>(ctx: *mut duk_context, obj_index: i32, 
     }
 }
 
-// duk_put_global_string
-pub fn put_global_string<T: Into<Vec<u8>>>(ctx: *mut duk_context, key: T) -> bool {
-    let cstring_key = CString::new(key).unwrap();
+// duk_require_int
+pub fn require_int(ctx: *mut duk_context, index: i32) -> i32 {
     unsafe {
-        duk_put_global_string(ctx, cstring_key.as_ptr())
+        duk_require_int(ctx, index)
     }
 }

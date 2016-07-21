@@ -4,11 +4,11 @@
 
 #include "../deps/duktape-releases/src/duktape.h"
 
-duk_context *rust_duk_create_heap_default(void) {
+duk_context *_duk_create_heap_default(void) {
   return duk_create_heap_default();
 }
 
-duk_int_t rust_duk_peval_file(duk_context *ctx, const char *path) {
+duk_int_t _duk_peval_file(duk_context *ctx, const char *path) {
   return duk_peval_file(ctx, path);
 }
 

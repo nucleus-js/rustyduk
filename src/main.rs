@@ -23,8 +23,8 @@ use duk_structs::duk_context;
 //
 
 extern {
-    fn rust_duk_create_heap_default() -> *mut duk_context;
-    fn rust_duk_peval_file(ctx: *mut duk_context, path: *const c_char) -> c_int;
+    fn _duk_create_heap_default() -> *mut duk_context;
+    fn _duk_peval_file(ctx: *mut duk_context, path: *const c_char) -> c_int;
     fn duk_destroy_heap(ctx: *mut duk_context);
 }
 
@@ -79,14 +79,14 @@ fn main() {
     // duktape setup
     let ctx: *mut duk_context;
     unsafe {
-        ctx = rust_duk_create_heap_default();
+        ctx = _duk_create_heap_default();
     }
 
     // nucleus JS setup
     duk_put_nucleus(ctx, args);
 
     unsafe {
-        rust_duk_peval_file(ctx, c_js_path.as_ptr());
+        _duk_peval_file(ctx, c_js_path.as_ptr());
         duk_destroy_heap(ctx);
     }
 }
