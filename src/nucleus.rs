@@ -76,6 +76,8 @@ pub fn duk_put_nucleus(ctx: *mut duk_context, args: Vec<String>) {
 
     duk::push_c_function(ctx, nucleus_functions::exit, 1);
     duk::put_prop_string(ctx, -2, "exit");
+    duk::push_c_function(ctx, nucleus_functions::env_keys, 1);
+    duk::put_prop_string(ctx, -2, "envkeys");
 
     // TODO: No linkings to libuv yet
     // // nucleus.uv

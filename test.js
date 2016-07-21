@@ -16,6 +16,10 @@ print("versions: ", nucleus.versions)
 
 print("versions.duktape: ", nucleus.versions.duktape)
 
+print("envkeys: ", nucleus.envkeys())
+
+print("envkeys(true): ", nucleus.envkeys(true))
+
 print("exit: ", nucleus.exit)
 
 nucleus.exit(0);
