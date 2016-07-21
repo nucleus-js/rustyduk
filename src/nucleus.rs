@@ -1,12 +1,10 @@
-// stdlib imports
-use std::ptr::null;
 
 // crate imports
 extern crate libc;
 use libc::c_long;
 
 // use internals
-use duk_structs::{duk_context, duk_function_list_entry};
+use duk_structs::duk_context;
 use duk_api as duk;
 use nucleus_functions;
 //
@@ -76,15 +74,8 @@ pub fn duk_put_nucleus(ctx: *mut duk_context, args: Vec<String>) {
     // #endif
     duk::put_prop_string(ctx, -2, "versions");
 
-    #[allow(unused_variables)]
-    extern fn null_function(ctx: *mut duk_context) -> i32 { 0 }
-
-    let functions: &[duk_function_list_entry] = &[
-        duk_function_list_entry::new("exit", nucleus_functions::exit, 1),
-        duk_function_list_entry::new_null(null(), null_function, 0)
-    ];
-
-    duk::put_function_list(ctx, -1, functions.as_ptr());
+    duk::push_c_function(ctx, nucleus_functions::exit, 1);
+    duk::put_prop_string(ctx, -2, "exit");
 
     // TODO: No linkings to libuv yet
     // // nucleus.uv
