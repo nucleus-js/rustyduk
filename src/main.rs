@@ -87,13 +87,16 @@ fn main() {
     // nucleus JS setup
     duk_put_nucleus(ctx, args);
 
+    // eval the file and store a potential error indicator
     let err: i32;
     unsafe {
         err = _duk_peval_file(ctx, c_js_path.as_ptr());
     }
 
+    // if we have an error, we need to print it & the stack
     if err > 0 {
         unsafe {
+            // dumps some extra stack infomation
             _duk_dump_context_stderr(ctx);
         }
         duk::get_prop_string(ctx, -1, "stack");
@@ -102,6 +105,7 @@ fn main() {
         process::exit(1);
     }
 
+    // at this point the process is exiting normally
     unsafe {
         duk_destroy_heap(ctx);
     }

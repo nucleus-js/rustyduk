@@ -1,4 +1,3 @@
-
 // crate imports
 extern crate libc;
 use libc::c_long;

@@ -1,4 +1,3 @@
-
 // Silly duktape header linkings because Rust doesn't do it (yet?),
 // and `bindgen` doesn't work good enough yet.
 
