@@ -31,6 +31,10 @@ extern {
 }
 
 
+fn print_version() {
+    println!("rustyduk v0.0.0 implmenting Nucleus v0.0.0");
+}
+
 fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: {} FILE [options]", program);
     print!("{}", opts.usage(&brief));
@@ -45,6 +49,7 @@ fn main() {
     let mut opts = Options::new();
     opts.optopt("o", "output", "set output file name", "FILE");
     opts.optflag("h", "help", "print this help menu");
+    opts.optflag("v", "version", "print the Nucleus version");
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => { m }
         Err(f) => { panic!(f.to_string()) }
@@ -53,6 +58,12 @@ fn main() {
     // --help
     if matches.opt_present("h") {
         print_usage(&program, opts);
+        return;
+    }
+
+    // --version
+    if matches.opt_present("v") {
+        print_version();
         return;
     }
 
