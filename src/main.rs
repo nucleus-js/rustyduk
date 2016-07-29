@@ -112,7 +112,7 @@ fn main() {
         }
         duk::get_prop_string(ctx, -1, "stack");
         let err_str = duk::safe_to_string(ctx, -1);
-        println!("Uncaught {}\n", err_str);
+        println!("Uncaught {}", err_str);
         process::exit(1);
     }
 
