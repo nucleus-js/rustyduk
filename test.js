@@ -20,6 +20,8 @@ print("envkeys: ", nucleus.envkeys())
 
 print("envkeys(true): ", nucleus.envkeys(true))
 
+print("readfile('./test-error.js') ", nucleus.readfile('./test-error.js'))
+
 print("exit: ", nucleus.exit)
 
 nucleus.exit(0);
