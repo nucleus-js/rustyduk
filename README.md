@@ -9,27 +9,51 @@ The `rustc` compiler and the `cargo` package manager are necessary in order to b
 ## Building
 
 ```bash
+make
+```
+or
+```bash
 cargo build
 ```
 
 ## Tests
 
+Manual tests:
+
 ```bash
-./target/debug/rusty-duktape test.js
+make test
 ```
 
-Currently, the test output should look like this. In the future, it will use the design repo's automated tests.
+Currently, each test should have output that looks similar to this.
+In the future, it will use the design repo's automated tests.
 
 ```
 Hello World!
 nucleus:  [object Object]
-cmd:  ./target/debug/rusty-duktape
-rawArgs:  ./target/debug/rusty-duktape,test.js
-rawArgs[0]:  ./target/debug/rusty-duktape
-rawArgs[1]:  test.js
+cmd:  target/debug/nucleus
+rawArgs:  target/debug/nucleus,--no-bundle,test.js,--,0,5,10
+rawArgs[0]:  target/debug/nucleus
+rawArgs[1]:  --no-bundle
+rawArgs[2]:  test.js
+rawArgs[3]:  --
+rawArgs[4]:  0
+rawArgs[5]:  5
+rawArgs[6]:  10
 engine:  duktape
 versions:  [object Object]
 versions.duktape:  v1.5.0
+envkeys:  SHELL, <... etc>
+envkeys(true): SHELL, <... etc>
+readfile('test-error.js')  print('hi')
+
+nucleus.exit('aaaa')
+
+print(":/")
+
+throw new Error('error!!')
+
+print('noooo')
+
 exit:  function () {"native"}
 ```
 
