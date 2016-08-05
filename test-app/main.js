@@ -22,6 +22,8 @@ print("envkeys(true): ", nucleus.envkeys(true))
 
 print("readfile('test-error.js') ", nucleus.readfile('test-error.js'))
 
+print("dofile('deps/hello.js') ", nucleus.dofile('deps/hello.js'))
+
 print("exit: ", nucleus.exit)
 
 nucleus.exit(0);

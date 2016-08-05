@@ -55,7 +55,10 @@ pub extern fn do_file(ctx: *mut duk_context) -> i32 {
 
 
 fn compile(ctx: *mut duk_context, code: String, name: String) {
+  duk::push_string(ctx, "(function(){");
   duk::push_string(ctx, code);
+  duk::push_string(ctx, "})()");
+  duk::concat(ctx, 3);
   duk::push_string(ctx, name);
-  duk::compile(ctx, 0 as u32);
+  duk::compile(ctx, 0);
 }

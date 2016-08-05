@@ -1,7 +1,6 @@
 // stdlib imports
 use std::{env, fs, process};
 use std::ffi::CString;
-use std::path::Path;
 
 // crate imports
 extern crate libc;
@@ -12,6 +11,7 @@ use getopts::Options;
 //
 
 // declare internal modules
+mod bundler;
 mod nucleus;
 mod duk_structs;
 mod duk_api;
@@ -54,6 +54,7 @@ fn main() {
     opts.optopt("o", "output", "set output file name", "FILE");
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("v", "version", "print the Nucleus version");
+    opts.optflag("z", "zip-only", "only create zip, no embedding");
     opts.optflag("N", "no-bundle", "do not execute as a bundle");
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => { m }
@@ -73,11 +74,57 @@ fn main() {
     }
 
     // At this point we know we'll do something.
-    // Init resource to check if we are a zip or not.
-    resource::init();
+    // Init resource to check if we are a zip or not, and decide
+    // the base path.
+    //
+    // The base path is either the executable or a directory we point at.
+    let base_path = match resource::init() {
+        true => {
+            // executable is a zip
+            fs::canonicalize(&program).unwrap().to_str().unwrap().to_owned()
+        }
+        false => {
+            // if there is no free argument (such as a filename or folder),
+            // print the help
+            let input = if matches.free.is_empty() {
+                print_usage(&program, opts);
+                return;
+            } else {
+                // otherwise make a copy of the arument so we can use it
+                matches.free[0].clone()
+            };
 
-    // TODO(Fishrock123): Uncomment when we start working on bundling.
-    // let output = matches.opt_str("o");
+            let path = fs::canonicalize(input).unwrap();
+            if matches.opt_present("N") {
+                path.parent().unwrap().to_str().unwrap().to_owned()
+            } else {
+                path.to_str().unwrap().to_owned()
+            }
+        }
+    };
+
+    // Hard to do this all in resource, so just set it from here.
+    resource::set_base(&base_path);
+
+    // Look for an output file.
+    // This means we are producing some kind of bundle rather than running a program.
+    if matches.opt_present("o") {
+        let output = match matches.opt_str("o") {
+            Some(s) => { s }
+            None => {
+                print!("Error: the option -o, --output requires an argument!");
+                process::exit(1);
+            }
+        };
+
+        // let build_type: BuildType;
+        // if matches.opt_present("z") {
+        //     build_type = BuildType::ZIP;
+        // }
+
+        bundler::build_zip(base_path, output, matches.opt_present("z"));
+        return;
+    }
 
     // duktape setup
     let ctx: *mut duk_context;
@@ -88,41 +135,36 @@ fn main() {
     // nucleus JS setup
     duk_put_nucleus(ctx, args);
 
-    // eval the file and store a potential error indicator
+    // evaluating some prgram. Prepare to catch an error.
     let err: i32;
+
+    // --no-bundle
     if matches.opt_present("N") {
-        // if there is no free argument (such as a filename or folder),
-        // print the help
-        let input = if matches.free.is_empty() {
-            print_usage(&program, opts);
-            return;
-        } else {
-            // otherwise make a copy of the arument so we can use it
-            matches.free[0].clone()
-        };
-
-        // Get the realpath
-        let js_path = match fs::canonicalize(input) {
-            Ok(m) => { m }
-            Err(f) => { panic!(f.to_string()) }
-        };
-
-        // Convert the path::Path into a String we can pass to C
-        let c_js_path = CString::new(js_path.to_str().unwrap()).unwrap();
+        // Convert the path into a String we can pass to C
+        let wanted = matches.free[0].clone().to_owned();
+        let filepath = fs::canonicalize(wanted).unwrap().to_str().unwrap().to_owned();
+        let c_base_path = CString::new(filepath).unwrap();
 
         unsafe {
-            err = _duk_peval_file(ctx, c_js_path.as_ptr());
+            err = _duk_peval_file(ctx, c_base_path.as_ptr());
         }
 
     } else {
-        let mut entry_file = "main.js".to_owned();
+        let entry_file: String = "main.js".to_owned();
 
-        if !matches.free.is_empty() {
-            let possible_entry = matches.free[0].clone();
-            if Path::new(&possible_entry).ends_with(".js") {
-                entry_file = possible_entry;
-            }
-        }
+        // TODO(Fishrock123): support renaming of main.js
+
+        // If there are free arguments (i.e. not an option or past `--`)
+        // if !matches.free.is_empty() {
+        //     let possible_entry = matches.free[0].clone();
+
+            // If we we passed a .js file,
+            // if Path::new(&possible_entry).ends_with(".js") {
+            //     entry_file = possible_entry;
+            // } else {
+        resource::check_set_zip(&base_path);
+            // }
+        // }
 
         duk::push_string(ctx, "nucleus.dofile('");
         duk::push_lstring(ctx, entry_file);
