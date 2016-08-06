@@ -1,5 +1,5 @@
 [root]
-name = "rusty-duktape"
+name = "rustyduk-nucleus"
 version = "0.1.0"
 dependencies = [
  "gcc 0.3.31 (registry+https://github.com/rust-lang/crates.io-index)",
