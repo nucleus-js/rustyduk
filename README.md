@@ -6,6 +6,8 @@ The `rustc` compiler and the `cargo` package manager are necessary in order to b
 
 **Note**: This repo also uses _[git submodules](https://chrisjean.com/git-submodules-adding-using-removing-and-updating/)_ to manage it's dependencies. As such, cloning this repo must be done with `git clone --depth=1 ...`.
 
+Please note that this project is released with a [Contributor Code of Conduct](Code_of_Conduct.md). By participating in this project you agree to abide by its terms.
+
 ## Building
 
 ```bash
