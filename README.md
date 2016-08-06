@@ -18,6 +18,33 @@ or
 cargo build
 ```
 
+## Examples
+
+Single-file:
+
+```js
+// hello.js
+print('hello world')
+```
+
+```
+./target/debug/nucleus --no-bundle hello.js
+> hello world
+```
+
+Bundle: (main.js)
+
+```js
+// bundle/main.js
+print('hello world')
+```
+
+```
+./target/debug/nucleus bundle -o hello-app
+./hello-app
+> hello world
+```
+
 ## Tests
 
 Manual tests:
