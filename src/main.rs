@@ -51,10 +51,10 @@ fn main() {
 
     // process options
     let mut opts = Options::new();
-    opts.optopt("o", "output", "set output file name", "FILE");
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("v", "version", "print the Nucleus version");
-    opts.optflag("z", "zip-only", "only create zip, no embedding");
+    opts.optopt("o", "output", "create a bundle with embedded nucleus at the specified file", "FILE");
+    opts.optflag("z", "zip-only", "create zip bundle without embedding");
     opts.optflag("N", "no-bundle", "do not execute as a bundle");
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => { m }
