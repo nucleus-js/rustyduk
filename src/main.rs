@@ -36,7 +36,7 @@ extern {
 
 
 fn print_version() {
-    println!("rustyduk v0.0.0 implmenting Nucleus v0.0.0");
+    println!("rustyduk v0.0.0 implementing Nucleus v0.0.0");
 }
 
 fn print_usage(program: &str, opts: Options) {
