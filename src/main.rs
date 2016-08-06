@@ -26,7 +26,7 @@ use duk_structs::duk_context;
 use duk_api as duk;
 //
 
-extern {
+extern "C" {
     fn _duk_create_heap_default() -> *mut duk_context;
     fn _duk_peval(ctx: *mut duk_context) -> c_int;
     fn _duk_peval_file(ctx: *mut duk_context, path: *const c_char) -> c_int;
@@ -53,12 +53,15 @@ fn main() {
     let mut opts = Options::new();
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("v", "version", "print the Nucleus version");
-    opts.optopt("o", "output", "create a bundle with embedded nucleus at the specified file", "FILE");
+    opts.optopt("o",
+                "output",
+                "create a bundle with embedded nucleus at the specified file",
+                "FILE");
     opts.optflag("z", "zip-only", "create zip bundle without embedding");
     opts.optflag("N", "no-bundle", "do not execute as a bundle");
     let matches = match opts.parse(&args[1..]) {
-        Ok(m) => { m }
-        Err(f) => { panic!(f.to_string()) }
+        Ok(m) => m,
+        Err(f) => panic!(f.to_string()),
     };
 
     // --help
@@ -90,7 +93,7 @@ fn main() {
                 print_usage(&program, opts);
                 return;
             } else {
-                // otherwise make a copy of the arument so we can use it
+                // otherwise make a copy of the argument so we can use it
                 matches.free[0].clone()
             };
 
@@ -110,7 +113,7 @@ fn main() {
     // This means we are producing some kind of bundle rather than running a program.
     if matches.opt_present("o") {
         let output = match matches.opt_str("o") {
-            Some(s) => { s }
+            Some(s) => s,
             None => {
                 print!("Error: the option -o, --output requires an argument!");
                 process::exit(1);
@@ -158,12 +161,12 @@ fn main() {
         // if !matches.free.is_empty() {
         //     let possible_entry = matches.free[0].clone();
 
-            // If we we passed a .js file,
-            // if Path::new(&possible_entry).ends_with(".js") {
-            //     entry_file = possible_entry;
-            // } else {
+        //     // If we we passed a .js file,
+        //     if Path::new(&possible_entry).ends_with(".js") {
+        //         entry_file = possible_entry;
+        //     } else {
         resource::check_set_zip(&base_path);
-            // }
+        //     }
         // }
 
         duk::push_string(ctx, "nucleus.dofile('");

@@ -8,7 +8,7 @@ use duk_api as duk;
 use nucleus_functions;
 //
 
-extern {
+extern "C" {
     static _DUK_VERSION: c_long;
 }
 

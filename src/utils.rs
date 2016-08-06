@@ -1,10 +1,10 @@
 // stdlib imports
-use std::ffi::{CStr};
+use std::ffi::CStr;
 use std::str;
 
 // crate imports
 extern crate libc;
-use libc::{c_char};
+use libc::c_char;
 
 pub fn string_from_c_pointer(external_str: *const c_char) -> String {
     let c_str: &CStr = unsafe { CStr::from_ptr(external_str) };

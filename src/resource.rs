@@ -2,14 +2,14 @@
 use std::env;
 use std::fs::{self, File};
 use std::io::{BufReader, ErrorKind, Read};
-use std::path::{Path};
+use std::path::Path;
 use std::mem;
 //
 
 
 // crate imports
 extern crate libc;
-use libc::{c_int};
+use libc::c_int;
 
 extern crate zip;
 //
@@ -19,7 +19,7 @@ use duk_structs::duk_context;
 use duk_api as duk;
 //
 
-extern {
+extern "C" {
     static _DUK_ERR_ERROR: c_int;
 }
 
@@ -30,7 +30,9 @@ static mut path_set: bool = false;
 
 pub fn init() -> bool {
     unsafe {
-        if initialized { panic!("resource was already initialized!"); }
+        if initialized {
+            panic!("resource was already initialized!");
+        }
         initialized = true;
     }
     check_set_zip(&env::current_exe().unwrap().to_str().unwrap())
@@ -57,10 +59,8 @@ pub fn set_base(_base_path: &str) {
 
 fn check_nucleus_is_zip(bundle_path: &str) -> bool {
     let bundle_file = match File::open(&bundle_path) {
-        Ok(f) => { f }
-        Err(_) => {
-            return false
-        }
+        Ok(f) => f,
+        Err(_) => return false,
     };
 
     let reader = BufReader::new(bundle_file);
@@ -114,14 +114,16 @@ fn read_from_zip(ctx: *mut duk_context) -> i32 {
 
     let mut data = String::new();
     match zip_archive.by_name(&filename) {
-        Ok(mut file) => { match file.read_to_string(&mut data) {
-            Err(_) => {
-                duk::push_null(ctx);
+        Ok(mut file) => {
+            match file.read_to_string(&mut data) {
+                Err(_) => {
+                    duk::push_null(ctx);
+                }
+                _ => {
+                    duk::push_lstring(ctx, data);
+                }
             }
-            _ => {
-                duk::push_lstring(ctx, data);
-            }
-        }}
+        }
         Err(err) => {
             println!("Failed to find bundled file {} - {:?}", filename, err);
             println!("Number of bundle files: {}", len);
@@ -131,7 +133,9 @@ fn read_from_zip(ctx: *mut duk_context) -> i32 {
             let _reader = BufReader::new(_bundle_file);
             let mut _zip_archive = zip::ZipArchive::new(_reader).unwrap();
             for index in 0..len {
-                println!("File at index {}: {}", index, _zip_archive.by_index(index).unwrap().name());
+                println!("File at index {}: {}",
+                         index,
+                         _zip_archive.by_index(index).unwrap().name());
             }
 
             let args = format!("Failed to find bundled file {} - {:?}", filename, err);
@@ -150,29 +154,33 @@ fn read_from_disk(ctx: *mut duk_context) -> i32 {
     let path = Path::new(&base).join(&filename);
 
     let real_path = match fs::canonicalize(path) {
-        Ok(m) => { m }
-        Err(err) => { match err.kind() {
-            ErrorKind::NotFound => {
-                duk::push_null(ctx);
-                return 1;
+        Ok(m) => m,
+        Err(err) => {
+            match err.kind() {
+                ErrorKind::NotFound => {
+                    duk::push_null(ctx);
+                    return 1;
+                }
+                _ => {
+                    let args = format!("Failed to canonicalize {} - {:?}", filename, err.kind());
+                    duk::error(ctx, _DUK_ERR_ERROR, args);
+                    return 0;
+                }
             }
-            _ => {
-                let args = format!("Failed to canonicalize {} - {:?}", filename, err.kind());
-                duk::error(ctx, _DUK_ERR_ERROR, args);
-                return 0;
-            }
-        }}
+        }
     };
 
     let mut file = match File::open(real_path) {
-        Ok(m) => { m }
-        Err(err) => { match err.kind() {
-            _ => {
-                let args = format!("Failed to open {} - {:?}", filename, err.kind());
-                duk::error(ctx, _DUK_ERR_ERROR, args);
-                return 0;
+        Ok(m) => m,
+        Err(err) => {
+            match err.kind() {
+                _ => {
+                    let args = format!("Failed to open {} - {:?}", filename, err.kind());
+                    duk::error(ctx, _DUK_ERR_ERROR, args);
+                    return 0;
+                }
             }
-        }}
+        }
     };
 
     let mut buf = String::new();
