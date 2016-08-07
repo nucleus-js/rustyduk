@@ -131,12 +131,13 @@ fn read_from_zip(ctx: *mut duk_context) -> i32 {
         Ok(mut file) => {
             // if the file exists, try to read the data from it
             match file.read_to_string(&mut data) {
+                Ok(_) => {
+                    // push the data as a string if it exists
+                    duk::push_lstring(ctx, data);
+                }
                 Err(_) => {
                     // push a null if we couldn't make it a valid string
                     duk::push_null(ctx);
-                }
-                _ => {
-                    duk::push_lstring(ctx, data);
                 }
             }
         }
@@ -216,14 +217,15 @@ fn read_from_disk(ctx: *mut duk_context) -> i32 {
     let mut buf = String::new();
     // if the file exists, try to read the data from it
     match file.read_to_string(&mut buf) {
-        Err(err) => {
-            let args = format!("Failed to read {} - {:?}", filename, err.kind());
-            duk::error(ctx, _DUK_ERR_ERROR, args);
-            return 0;
+        Ok(_) => {
+            // push the data as a string if it exists
+            duk::push_lstring(ctx, buf);
         }
-        _ => {}
+        Err(_) => {
+            // null if the file wasn't found
+            duk::push_null(ctx);
+        }
     }
 
-    duk::push_lstring(ctx, buf);
     1
 }
