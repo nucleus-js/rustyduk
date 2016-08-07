@@ -73,6 +73,7 @@ pub fn duk_put_nucleus(ctx: *mut duk_context, args: Vec<String>) {
     // #endif
     duk::put_prop_string(ctx, -2, "versions");
 
+    // nucleus functions
     duk::push_c_function(ctx, nucleus_functions::exit, 1);
     duk::put_prop_string(ctx, -2, "exit");
     duk::push_c_function(ctx, nucleus_functions::env_keys, 1);

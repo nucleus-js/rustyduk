@@ -49,7 +49,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
 
-    // process options
+    // add options
     let mut opts = Options::new();
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("v", "version", "print the Nucleus version");
@@ -59,6 +59,8 @@ fn main() {
                 "FILE");
     opts.optflag("z", "zip-only", "create zip bundle without embedding");
     opts.optflag("N", "no-bundle", "do not execute as a bundle");
+
+    // process those options
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
         Err(f) => panic!(f.to_string()),
@@ -97,10 +99,16 @@ fn main() {
                 matches.free[0].clone()
             };
 
+            // get a canonical path from the input
             let path = fs::canonicalize(input).unwrap();
             if matches.opt_present("N") {
+                // if we are executing just a file, the base should
+                // be the parent directory rather than the file itself
+
+                // do some unwrapping to return a string from Path
                 path.parent().unwrap().to_str().unwrap().to_owned()
             } else {
+                // do some unwrapping to return a string from Path
                 path.to_str().unwrap().to_owned()
             }
         }
@@ -153,6 +161,7 @@ fn main() {
         }
 
     } else {
+        // default entry file in a bundle
         let entry_file: String = "main.js".to_owned();
 
         // TODO(Fishrock123): support renaming of main.js
@@ -165,15 +174,19 @@ fn main() {
         //     if Path::new(&possible_entry).ends_with(".js") {
         //         entry_file = possible_entry;
         //     } else {
+
+        // check if the bundle path is a zip or not
         resource::check_set_zip(&base_path);
         //     }
         // }
 
+        // wrap everything in dofile()
         duk::push_string(ctx, "nucleus.dofile('");
         duk::push_lstring(ctx, entry_file);
         duk::push_string(ctx, "')");
         duk::concat(ctx, 3);
 
+        // evaluate
         unsafe {
             err = _duk_peval(ctx);
         }
